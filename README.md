@@ -4,3 +4,5 @@ Scripts to analyze RNAseq reads, including filtering, alignment, featureCounts, 
 Scripts for hierarchical clustering of gene sets
 
 Scripts for GOterm analysis
+
+Scripts for bacterial phylogenetic analysis using AMPHORA2
