@@ -59,22 +59,38 @@ def readGFF(filepath, parseInfo=True, splits=[";", "="], attColumn="attribute"):
         df[attColumn] = df[attColumn].apply(gtfParseInfo)
     return df
 
-def writeClusterCommand(command, options, printCommand=True, splitCommand=False):
-    """
-    Simulates the cluster command generation. 
-    In the original, this used a template file. Here, it performs a basic 
-    string format to make the scripts functional for general users.
-    """
-    # This is a simplified version of your template system
-    # It assumes the command is a string that can be formatted with the options
-    try:
-        formatted_command = command.format(*options)
-    except IndexError:
-        formatted_command = f"{command} {' '.join(map(str, options))}"
+def writeClusterCommand(command, options, templateFile, printCommand = True, commandToFile = False, splitCommand = False):
+    """writes a command to run on the institute cluster based on commands in a template file"""
+    command = command.split()
+    if len(command) < 2:
+        command.append("")
+    if command[0] == "python" and os.path.dirname(command[1]) == "":
+        command[1] = r"[^\s]*" + command[1]
+        
+    options = tuple(options)
+    with open(templateFile, "r") as clusterCommandFile: 
+        rePat = r"template\s?(.*{0}\s*{1}.*)".format(command[0], command[1])
+        findView = re.compile(rePat)
+        viewTemplate = [findView.match(entry).group(1) for entry in clusterCommandFile.read().split('\n') if findView.match(entry)]
+    if len(viewTemplate) > 1:
+        commandList = "\n".join(["".join(entry[7:]) for entry in viewTemplate])
+        logger.warning(f"writeClusterCommand has found multiple possible commands:\n{commandList}")
+    elif len(viewTemplate) == 0:
+        logger.warning(f"no template found for {command}")
+    viewTemplate = viewTemplate[0]
     
-    if splitCommand:
-        return shlex.split(formatted_command)
-    return formatted_command
+    if commandToFile:
+        clusterCommandFile = open(commandToFile, "a")
+        
+        clusterCommandFile.write("\n" + viewTemplate.format(*options) + "\n")
+        
+        clusterCommandFile.close()
+
+    if printCommand:
+        outputCommand = viewTemplate.format(*options)
+        if splitCommand:
+            outputCommand = shlex.split(outputCommand)
+        return(outputCommand)
 
 def runClusterCommand(commandLine, bsub=False, returnOuts=True):
     """Executes a system command and returns the output."""

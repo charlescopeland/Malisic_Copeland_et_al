@@ -1,0 +1,11 @@
+template bsub -q short -R "rusage[mem=512]" -M 2056 perl  /netscratch/dep_psl/grp_psl/CharlesNet/AMPHORA2/Scripts/MarkerAlignTrim.pl -Trim -OutputFormat fasta -Directory {0}
+
+template bsub -q normal -R "rusage[mem=4000]" -M 6000 ./FastTreeRunner.sh {0} {1}
+
+template bsub -q short -R "rusage[mem=1024]" -M 5012 fastp -q 20 -x --cut_front --cut_tail -W 5 -M 25 -h {0} -i {1} -I {2} -o {3} -O {4}
+
+template bsub -q normal -R "rusage[mem=4000]" -M 8000 ./hisat2_alignment.sh -p {0} {1} {2} {3}
+
+template bsub -q normal -R "rusage[mem=4000]" -M 8000 ./hisat2_alignment_nosplice.sh -p {0} {1} {2} {3}
+
+template bsub -q normal -R "rusage[mem=5000]" -M 6000 /netscratch/dep_psl/grp_psl/CharlesSoftware/subread/bin/featureCounts -Mp --countReadPairs --primary -a {0} -A ./Genomes/chromosomeAliases.txt -o {1} -t {2} -T 4 --verbose {3}
