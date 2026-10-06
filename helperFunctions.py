@@ -134,3 +134,27 @@ def fileMetaTable(argNamespace, script=None, forExcel=True, additionalMessages=d
 def assignPlotID(plotHistoryDict, prefixLetter="M"):
     """Generates a unique ID for a plot."""
     return f"{prefixLetter}{len(plotHistoryDict) + 1:05d}"
+
+def listTotal(fileName, sep = "Y", sepChar = ",", keepHeader = True, removeQuotes = "True"):
+    with open(fileName, 'r') as file:
+        string = file.read()
+    dictLogger.debug(f"{sep} sep character is {sepChar}")
+    bigList = string.split('\n')
+    if bigList[-1] == "":
+        bigList = bigList[:-1]
+    if not keepHeader:
+        bigList = bigList[1:]
+    if sep == "Y":
+        bigList = [line.split(sepChar) for line in bigList]
+    if removeQuotes:
+        for line in bigList:
+            for index in range(0, len(line)):
+                if line[index].startswith('"') and line[index].endswith('"'):
+                    line[index] = line[index][1:-1]
+    return(bigList)
+
+
+def listForColumn(fileName, column, keepHeader = True, **kwargs):
+    bigList = listTotal(fileName, keepHeader = keepHeader, **kwargs)
+    smallList = [entry[column] for entry in bigList]
+    return smallList

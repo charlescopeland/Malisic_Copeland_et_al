@@ -6,7 +6,7 @@ Created on Fri Apr  7 13:03:30 2023
 """
 
 
-import helperFunctions, os, logging, argparse, BioCSV, re, time
+import helperFunctions, os, logging, argparse, re, time
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -30,7 +30,7 @@ args = parser.parse_args()
 minutes = 60
 
 if args.file:
-    toAlign = BioCSV.listTotal(args.file) #returns list of files from file
+    toAlign = helperFunctions.listTotal(args.file) #returns list of files from file
 else:
     toAlign = [[args.sample,  args.reference]]
     

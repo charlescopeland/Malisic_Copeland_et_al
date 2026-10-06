@@ -6,7 +6,7 @@ Created on Tue Apr 18 17:35:02 2023
 """
 
 
-import helperFunctions, BioCSV, os, argparse, logging, json, sys
+import helperFunctions, os, argparse, logging, json, sys
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ if reference in references:
 if args.samples:
     suffix = ""
     if len(args.samples) == 1 and os.path.isfile((sampleFile := helperFunctions.defaultFilePath(args.samples[0], folder))):
-        toCount = BioCSV.listForColumn(sampleFile, 0) #returns a list of samples from the given file
+        toCount = helperFunctions.listForColumn(sampleFile, 0) #returns a list of samples from the given file
     else:
         toCount = args.samples
         
