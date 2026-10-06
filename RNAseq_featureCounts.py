@@ -6,14 +6,14 @@ Created on Tue Apr 18 17:35:02 2023
 """
 
 
-import genomicsTools, BioCSV, os, argparse, logging, json, sys
+import helperFunctions, BioCSV, os, argparse, logging, json, sys
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-config = genomicsTools.scriptConfig()  #load institute-specific file server paths
+config = helperFunctions.scriptConfig()  #load institute-specific file server paths
 netscratch = config["netscratch"]
 biodata = config["biodata"]
 
@@ -35,7 +35,7 @@ if not hasattr(sys, "ps1"):
 else:
     vars(args).update(interactiveArgs)
 
-folder = genomicsTools.defaultFilePath(args.experimentFolder, netscratch)
+folder = helperFunctions.defaultFilePath(args.experimentFolder, netscratch)
 featuresFolder = os.path.join(folder, "featurecounts")
 
 reference = args.reference
@@ -46,20 +46,9 @@ if reference in references:
    
 
 #%%
-def pickSuffix(genotype = "Col,Van", time = "12,24,48,120", bacteria = "mock,WCS417,R569,RW"):
-    suffix = []
-    fullSet = {"Col,Van", "12,24,48,120", "mock,WCS417,R569,RW"}
-    for entry in [time, genotype, bacteria]:
-        if entry not in fullSet:
-            suffix.append(entry.replace(",", "_"))
-    if not suffix:
-        suffix = ["combined"]
-    return("_".join(suffix))
-            
-#%%
 if args.samples:
     suffix = ""
-    if len(args.samples) == 1 and os.path.isfile((sampleFile := genomicsTools.defaultFilePath(args.samples[0], folder))):
+    if len(args.samples) == 1 and os.path.isfile((sampleFile := helperFunctions.defaultFilePath(args.samples[0], folder))):
         toCount = BioCSV.listForColumn(sampleFile, 0) #returns a list of samples from the given file
     else:
         toCount = args.samples
@@ -92,10 +81,10 @@ featureOut = os.path.join(featuresFolder, f"featureCounts{suffix}.tsv")
 #%%
 countCommand = "featureCounts" if not config["slurm"] else "runFeatureCounts"
     
-featureCommand = genomicsTools.writeClusterCommand(countCommand, (refInfo["annotation"],featureOut,  refInfo["featureType"], " ".join(forFeatureCounts))) #returns a command to run featurecounts on the institute cluster:
+featureCommand = helperFunctions.writeClusterCommand(countCommand, (refInfo["annotation"],featureOut,  refInfo["featureType"], " ".join(forFeatureCounts))) #returns a command to run featurecounts on the institute cluster:
 #bsub -q normal -R "rusage[mem=5000]" -M 6000 /netscratch/dep_psl/grp_psl/CharlesSoftware/subread/bin/featureCounts -Mp --countReadPairs --primary -a {0} -A ./Genomes/chromosomeAliases.txt -o {1} -t {2} -T 4 --verbose {3}    
 
-featureRun = genomicsTools.runClusterCommand(featureCommand) #runs the command on the institute cluster
+featureRun = helperFunctions.runClusterCommand(featureCommand) #runs the command on the institute cluster
 
 with open(bsubOut, "w") as writeOuts:
     writeOuts.write(f"featureCounts output: {featureRun.outs}\n")

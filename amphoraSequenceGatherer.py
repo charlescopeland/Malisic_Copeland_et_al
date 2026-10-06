@@ -6,11 +6,11 @@ Created on Tue Apr 26 14:28:58 2022
 """
 
 
-import genomicsTools, os, re, logging, argparse, sys
+import helperFunctions, os, re, logging, argparse, sys
 import pandas as pd
 from Bio import SeqIO, Seq
 
-config = genomicsTools.scriptConfig() #get paths specific to our institute file server
+config = helperFunctions.scriptConfig() #get paths specific to our institute file server
 netscratch = config["netscratch"]
 biodata = config["biodata"]
 logger = logging.getLogger(__name__)
@@ -61,9 +61,9 @@ if __name__ == "__main__":
     
     
     #%%
-    alignCommand = genomicsTools.writeClusterCommand("MarkerAlignTrim.pl", (outputFolder,)) #writes a command line for the MarkerAlignTrim.pl inserting the arguments:
+    alignCommand = helperFunctions.writeClusterCommand("MarkerAlignTrim.pl", (outputFolder,)) #writes a command line for the MarkerAlignTrim.pl inserting the arguments:
         #MarkerAlignTrim.pl -Trim -OutputFormat fasta -Directory {0}
-    runAlignment = genomicsTools.runClusterCommand(alignCommand) #runs the command above on the institute cluster
+    runAlignment = helperFunctions.runClusterCommand(alignCommand) #runs the command above on the institute cluster
     #if runAlignment.errs:
         #logger.info(runAlignment.command)
                     
@@ -98,15 +98,15 @@ if __name__ == "__main__":
     with open(concatFileName, "w") as concatFile:
         for entry in alignSeqs:
             concatFile.write(f">{entry}\n{''.join(alignSeqs[entry])}\n")
-    genomicsTools.fileCreationRecord(concatFileName, vars(args), __file__)
+    helperFunctions.fileCreationRecord(concatFileName, vars(args), __file__)
     #%%
-    makeTreeCommand = genomicsTools.writeClusterCommand("FastTreeRunner", (concatFileName, treeName)) #writes a command line for FastTree:
+    makeTreeCommand = helperFunctions.writeClusterCommand("FastTreeRunner", (concatFileName, treeName)) #writes a command line for FastTree:
         #./FastTreeRunner.sh {0} {1}
     
     
     #%%
-    runTree = genomicsTools.runClusterCommand(makeTreeCommand) #runs the command line above
-    genomicsTools.fileCreationRecord(treeName, vars(args), __file__)        
+    runTree = helperFunctions.runClusterCommand(makeTreeCommand) #runs the command line above
+    helperFunctions.fileCreationRecord(treeName, vars(args), __file__)        
                         
     
                     

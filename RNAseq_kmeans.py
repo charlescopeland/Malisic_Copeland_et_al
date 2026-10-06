@@ -6,7 +6,7 @@ Created on Tue Oct 31 15:07:50 2023
 """
 
 
-import genomicsTools, os, argparse, logging, sys, json
+import helperFunctions, os, argparse, logging, sys, json
 import scipy.cluster.vq as spclus
 import pandas as pd
 import numpy as np
@@ -17,7 +17,7 @@ import figureImproveR, pythonPlots
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-config = genomicsTools.scriptConfig()
+config = helperFunctions.scriptConfig()
 netscratch = config["netscratch"]
 biodata = config["biodata"]
 cm = 1 / 2.5
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     else:
         vars(args).update(interactiveArgs)
     vars(args)["outputPrefix"] = f"{vars(args)['outputPrefix']}_k{args.chosenClusters}"  
-    newPlotid = genomicsTools.assignPlotID(previousPlots, "M")
+    newPlotid = helperFunctions.assignPlotID(previousPlots, "M")
     if (replicate := args.replicate):
         try: 
             logger.info(f"Replicating figure {args.replicate}")
@@ -101,8 +101,8 @@ if __name__ == "__main__":
     plt.style.use(os.path.join(biodata, "R_scripts", "pythonScripts", f"mplstyle.{args.purpose}.txt"))
     if not args.fromdeseq:
         counts = counts.iloc[:, 5:]
-    degs = genomicsTools.parseArgList(args.geneList)
-    args.outputPrefix = genomicsTools.defaultFilePath(args.outputPrefix, os.path.dirname(args.countTableFile))
+    degs = helperFunctions.parseArgList(args.geneList)
+    args.outputPrefix = helperFunctions.defaultFilePath(args.outputPrefix, os.path.dirname(args.countTableFile))
     ## the following is modified from chatGPT
     # 1) Subset to significant DEGs
     if degs:
@@ -196,8 +196,8 @@ if __name__ == "__main__":
                     treatments.set_index(0)
                 treatMerge = pd.merge(centroids_df.transpose().rename(columns={entry:f"cluster_{entry}" for entry in range(0, args.chosenClusters)}), treatments, left_index = True, right_index = True)
                 treatMerge.to_excel(ew, sheet_name="toPlot")
-            genomicsTools.fileMetaTable(args, script = __file__).to_excel(ew, sheet_name = "meta")
-            genomicsTools.fileCreationRecord(f"{args.outputPrefix}.xlsx", vars(args), script = __file__)
+            helperFunctions.fileMetaTable(args, script = __file__).to_excel(ew, sheet_name = "meta")
+            helperFunctions.fileCreationRecord(f"{args.outputPrefix}.xlsx", vars(args), script = __file__)
     elif args.clusteringType.casefold().startswith("h"):
         from scipy.spatial.distance import pdist
         from scipy.cluster.hierarchy import linkage, dendrogram, fcluster
@@ -314,8 +314,8 @@ if __name__ == "__main__":
                     treatments.set_index(0)
                 treatMerge = pd.merge(centroids.transpose().rename(columns={entry:f"cluster_{entry}" for entry in range(0, args.chosenClusters + 2)}), treatments, left_index = True, right_index = True)
                 treatMerge.to_excel(ew, sheet_name="toPlot")
-            genomicsTools.fileMetaTable(args, script = __file__).to_excel(ew, sheet_name = "meta")
-            genomicsTools.fileCreationRecord(f"{args.outputPrefix}.xlsx", vars(args), script = __file__)
+            helperFunctions.fileMetaTable(args, script = __file__).to_excel(ew, sheet_name = "meta")
+            helperFunctions.fileCreationRecord(f"{args.outputPrefix}.xlsx", vars(args), script = __file__)
             
         if not replicate:
             previousPlots.update({newPlotid: vars(args)})
@@ -337,6 +337,6 @@ if __name__ == "__main__":
             fof.write("\n".join(geneFiles))
         fofArgs = vars(args).copy()
         fofArgs.update({"files included": geneFiles})
-        genomicsTools.fileCreationRecord(fofName, fofArgs, script = __file__ )
+        helperFunctions.fileCreationRecord(fofName, fofArgs, script = __file__ )
             
        

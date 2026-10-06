@@ -6,7 +6,7 @@ Created on Tue Oct 31 15:07:50 2023
 """
 
 
-import genomicsTools, os, argparse, logging, math
+import helperFunctions, os, argparse, logging, math
 from collections import Counter
 import pandas as pd
 import csv
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-config = genomicsTools.scriptConfig()
+config = helperFunctions.scriptConfig()
 netscratch = config["netscratch"]
 biodata = config["biodata"]
 
@@ -132,7 +132,7 @@ else:
 #%%
 # IT466 genes to GO, via KO > PA
 
-IT466 = genomicsTools.readGFF(os.path.join(netscratch, "Genomes", "IT466.gff"))
+IT466 = helperFunctions.readGFF(os.path.join(netscratch, "Genomes", "IT466.gff"))
 
 IT466["KO"] = IT466["attribute"].apply(lambda x: x.get("KO"))
 
@@ -148,7 +148,7 @@ IT466["gene"] = IT466["gene"].apply(padLocus)
 IT466[["gene", "GOstr"]].to_csv(os.path.join(folder, f"IT466_gene_to_go_from_aeruginosa_{args.duplicateKOs}.map"), sep = "\t", quoting = csv.QUOTE_NONE, header = False, index = False)
 
 # parse and add GO terms from interproscan analysis
-gff = genomicsTools.readGFF(os.path.join(folder, "IT466_interpro_pfam.gff3"))
+gff = helperFunctions.readGFF(os.path.join(folder, "IT466_interpro_pfam.gff3"))
 
 gff["gene"] = gff["chromosome"].apply(padLocus)
 def parseOntology(attdict):
@@ -178,64 +178,3 @@ combinedFrame["GOstr"] = combinedFrame["combined"].apply(lambda x: ", ".join(x) 
 
 combinedFrame[["gene", "GOstr"]].to_csv(os.path.join(folder, f"IT466_gene_to_go_{args.duplicateKOs}.map"), sep = "\t", quoting = csv.QUOTE_NONE, header = False, index = False)
 
-#%% This is from chatGPT but maybe a hallucination? KEGG doesn't seem to have a GO database now
-# # 2) Collect organism KOs and fetch KO→GO
-# kos = sorted({ko for _, ko in gene_ko})
-# print(f"Unique KOs in {ORG}: {len(kos)}")
-
-# print("Downloading KO→GO for those KOs...")
-# ko_go_pairs = []
-# for batch in chunks(kos, 50):  # chunk to keep URLs reasonable
-#     url = "https://rest.kegg.jp/link/go/" + "+".join([f"ko:{k}" for k in batch])
-#     txt = get(url)
-#     if txt.strip():
-#         ko_go_pairs.extend(parse_link_tsv(txt))
-
-# # Normalize KO and GO ids
-# ko_go = []
-# for k, g in ko_go_pairs:
-#     ko = k.split(":", 1)[1]         # Kxxxxx
-#     go_full = g.split(":", 1)[1]    # GO:0000000
-#     ko_go.append((ko, go_full))
-
-# # 3) Fetch GO names (only for the GO terms we saw)
-# gos = sorted({go for _, go in ko_go})
-# print(f"Unique GO terms linked: {len(gos)}")
-
-# go_name_map = {}
-# for batch in chunks(gos, 100):
-#     url = "https://rest.kegg.jp/list/" + "+".join(batch)  # e.g., list/GO:0008150+GO:0003674
-#     txt = get(url)
-#     for line in txt.strip().splitlines():
-#         if not line:
-#             continue
-#         go_id_prefixed, name = line.split("\t", 1)  # "go:GO:0008150"
-#         go_id = go_id_prefixed.split(":", 1)[1]     # "GO:0008150"
-#         go_name_map[go_id] = name
-
-# # 4) Save KO→GO (+ GO name)
-# with open(os.path.join(args.folder, "{ORG}_ko_to_go.tsv"), "w") as f:
-#     f.write("ko\tgo\tgo_name\n")
-#     for ko, go in sorted(set(ko_go)):
-#         f.write(f"{ko}\t{go}\t{go_name_map.get(go, '')}\n")
-# print(f"ko_to_go_pae.tsv: {len(set(ko_go))} pairs")
-
-# # 5) Optional: gene→GO via KO→GO
-# gene_go = []
-# ko_to_gos = {}
-# for ko, go in set(ko_go):
-#     ko_to_gos.setdefault(ko, set()).add(go)
-
-# for gene, ko in set(gene_ko):
-#     for go in ko_to_gos.get(ko, []):
-#         gene_go.append((gene, go))
-
-# with open(os.path.join(args.folder,f"{ORG}_gene_to_go.tsv"), "w") as f:
-#     f.write("gene\tgo\tgo_name\n")
-#     for gene, go in sorted(set(gene_go)):
-#         f.write(f"{gene}\t{go}\t{go_name_map.get(go, '')}\n")
-# print(f"gene_to_go_pae.tsv: {len(set(gene_go))} pairs")
-
-# print(f"Done. Files written in: {args.folder}")
-
-#%%

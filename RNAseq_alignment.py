@@ -6,13 +6,13 @@ Created on Fri Apr  7 13:03:30 2023
 """
 
 
-import genomicsTools, os, logging, argparse, BioCSV, re, time
+import helperFunctions, os, logging, argparse, BioCSV, re, time
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-config = genomicsTools.scriptConfig()  #load institute-specific file server paths
+config = helperFunctions.scriptConfig()  #load institute-specific file server paths
 netscratch = config["netscratch"]
 biodata = config["biodata"]
 
@@ -57,13 +57,13 @@ for sample, reference in toAlign:
         refName =  os.path.basename(toAlign[sample])
     outputPref = os.path.join(alignmentFolder, f"{sample}_{refName}{suff}") 
     commandString = "hisat2_alignment.sh" if not args.noSplicedAlignment else "hisat2_alignment_nosplice.sh"
-    alignmentCommand = genomicsTools.writeClusterCommand(commandString, (outputPref, reference) + tuple(fastqs)) #returns command to run on institute cluster, inserting given arguments:
+    alignmentCommand = helperFunctions.writeClusterCommand(commandString, (outputPref, reference) + tuple(fastqs)) #returns command to run on institute cluster, inserting given arguments:
         #bsub -q normal -R "rusage[mem=4000]" -M 8000 ./hisat2_alignment.sh -p {0} {1} {2} {3}
         #or
         #bsub -q normal -R "rusage[mem=4000]" -M 8000 ./hisat2_alignment_nosplice.sh -p {0} {1} {2} {3}
         
     logger.debug(f"alignment for {sample} running with: {alignmentCommand}")
-    runAlignment = genomicsTools.runClusterCommand(alignmentCommand, bsub = f"bsub_out_{sample}_{refName}{suff}_alignment.txt", returnOuts = False) #runs the above command on the institute cluster
+    runAlignment = helperFunctions.runClusterCommand(alignmentCommand, bsub = f"bsub_out_{sample}_{refName}{suff}_alignment.txt", returnOuts = False) #runs the above command on the institute cluster
     
     time.sleep(sleepTime)
     

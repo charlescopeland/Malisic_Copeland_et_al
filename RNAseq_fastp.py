@@ -6,14 +6,14 @@ Created on Thu Apr  6 16:51:47 2023
 """
 
 
-import genomicsTools, os, logging, argparse, shlex
+import helperFunctions, os, logging, argparse, shlex
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-config = genomicsTools.scriptConfig()  #load institute-specific file server paths
+config = helperFunctions.scriptConfig()  #load institute-specific file server paths
 netscratch = config["netscratch"]
 biodata = config["biodata"]
 #%%
@@ -33,7 +33,7 @@ else:
 exlength = int(len(extension) * -1) - 1
 
 
-filteredReadsFolder = genomicsTools.defaultFilePath(args.filteredReadsFolder, os.path.dirname(args.rawReadsFolder))
+filteredReadsFolder = helperFunctions.defaultFilePath(args.filteredReadsFolder, os.path.dirname(args.rawReadsFolder))
 
 if not os.path.isdir(filteredReadsFolder):
     os.mkdir(filteredReadsFolder)
@@ -51,7 +51,7 @@ with open(os.path.join(args.rawReadsFolder, "fastp_commands.txt"), "w") as comma
             
                 inputs, outputs = [[os.path.join(folder[0], f"{sampleName}_{folder[1]}_{pair}.fq.gz") for pair in range(1, 3)] for folder in [[args.rawReadsFolder, "raw"], [filteredReadsFolder, "filt"]]]
         
-                fastpCommand = genomicsTools.writeClusterCommand("fastp", (reportFile, inputs[0], inputs[1], outputs[0], outputs[1])) #returns a command to run fastp on the hpc, inserting the arugments:
+                fastpCommand = helperFunctions.writeClusterCommand("fastp", (reportFile, inputs[0], inputs[1], outputs[0], outputs[1])) #returns a command to run fastp on the hpc, inserting the arugments:
                 
                 #bsub -q short -R "rusage[mem=1024]" -M 5012 fastp -q 20 -x --cut_front --cut_tail -W 5 -M 25 -h {0} -i {1} -I {2} -o {3} -O {4}
                 
@@ -64,7 +64,7 @@ with open(os.path.join(args.rawReadsFolder, "fastp_commands.txt"), "w") as comma
                     
                 commandsOut.write(f"{fastpCommand}\n")
                 
-                genomicsTools.runClusterCommand(fastpCommand, bsub = True) #runs the above command on the institute cluster
+                helperFunctions.runClusterCommand(fastpCommand, bsub = True) #runs the above command on the institute cluster
         
         
         

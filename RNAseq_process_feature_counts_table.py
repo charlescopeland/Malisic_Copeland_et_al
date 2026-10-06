@@ -6,7 +6,7 @@ Created on Tue Oct 31 15:07:50 2023
 """
 
 
-import genomicsTools, os, argparse, logging, re, sys
+import helperFunctions, os, argparse, logging, re, sys
 import pandas as pd
 
 logging.basicConfig()
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-config = genomicsTools.scriptConfig() #load institute-specific file server paths
+config = helperFunctions.scriptConfig() #load institute-specific file server paths
 netscratch = config["netscratch"]
 biodata = config["biodata"]
 
@@ -41,9 +41,9 @@ else:
     vars(args).update(interactiveArgs)
     
 folder = os.path.dirname(args.inputTable)
-outputTable = genomicsTools.defaultFilePath(args.outputTable, folder)
+outputTable = helperFunctions.defaultFilePath(args.outputTable, folder)
 
-replacementCounts = genomicsTools.defaultFilePath(args.replacementCounts, folder) if args.replacementCounts else None
+replacementCounts = helperFunctions.defaultFilePath(args.replacementCounts, folder) if args.replacementCounts else None
 sampleNamePattern = r"/(" + args.sampleNamePrefix  + r"\d{1,2})_"
 
 with open(args.inputTable, "r") as mc:
@@ -65,20 +65,20 @@ for row in replaceDF.index:
 
 #%%
 if args.removeSamples:
-    removeSamples = [entry.strip() for entry in genomicsTools.parseArgList(args.removeSamples)]
+    removeSamples = [entry.strip() for entry in helperFunctions.parseArgList(args.removeSamples)]
     #treatments = pd.read_excel(os.path.join(netscratch, "MIRO02-01", "MIRO02-01_samples.xlsx"), header = 0,)
     #tDict = {entry["Sample"]:entry["Treatment"] for i, entry in treatments.iterrows()}
     #colsToRemove = [c for c in mainDF.columns if tDict.setdefault(c, True) == "frax"]
     mainDF = mainDF[[c for c in mainDF.columns if c not in removeSamples]]
     
 if args.sortOrder:
-    sortList = genomicsTools.parseArgList(args.sortOrder)
+    sortList = helperFunctions.parseArgList(args.sortOrder)
     sortDict = {entry:i for i, entry in enumerate(sortList)}
     allColumns = sorted(list(mainDF.columns), key = lambda x: sortDict.setdefault(x, 0))
     mainDF = mainDF[allColumns]
 mainDF.to_csv(outputTable, sep = "\t", index_label = "Geneid")
 
-genomicsTools.fileCreationRecord(outputTable, vars(args), script = __file__) #records arguments used to create the file, for my own records
+helperFunctions.fileCreationRecord(outputTable, vars(args), script = __file__) #records arguments used to create the file, for my own records
 
         
     
