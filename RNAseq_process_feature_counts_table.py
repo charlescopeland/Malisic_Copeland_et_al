@@ -18,11 +18,7 @@ config = helperFunctions.scriptConfig() #load institute-specific file server pat
 netscratch = config["netscratch"]
 biodata = config["biodata"]
 
-interactiveArgs = {"inputTable":os.path.join(netscratch, "MIRO02-01", "deseq", "proc_normalized_counts.tsv"),
-                   "outputTable":os.path.join(netscratch, "MIRO02-01", "kmeans", "featureCounts_sample_DESeq_normalized_sorted.tsv"),
-                   #"removeSamples":os.path.join(netscratch, "VAPE15-14", "VAPE15-14_B3_samples.txt"),
-                   "sampleNamePrefix" : "MM",
-                   "sortOrder" : os.path.join(netscratch, "MIRO02-01", "MIRO02-01_sample_sort_order.txt")
+interactiveArgs = {
                    }
 
 parser = argparse.ArgumentParser()

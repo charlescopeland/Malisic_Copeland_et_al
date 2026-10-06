@@ -30,18 +30,7 @@ with open(plotHistoryFile, "r") as jf:
     previousPlots = json.load(jf)
     
 if __name__ == "__main__":
-    interactiveArgs = {"countTableFile":os.path.join(netscratch, "MIRO02-01", "kmeans", "featureCounts_sample_DESeq_normalized_sorted_coumarin_top.tsv"),
-                       "geneList":os.path.join(netscratch, "MIRO02-01", "deseq", "wt_specific_gene_list_unpadded.txt"),
-                       "outputPrefix":"MIRO02-01_wt-specific_genes_hierarch",
-                       "treatments" : [os.path.join(netscratch, "MIRO02-01", "MIRO02-01_samples.xlsx" ), "samples", "Sample"],
-                       "chosenClusters":1,
-                       "clusteringType":"hierarchical",
-                       "fromdeseq":True,
-                       "purpose":"publication",
-                       "figureSize": [8, 8],
-                       "gapSpacing" : 0,
-                       "outputClusters":False,
-                       "aspect":1
+    interactiveArgs = {
          }
     
     if interactiveArgs.get("update"):

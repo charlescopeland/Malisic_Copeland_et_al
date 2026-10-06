@@ -31,7 +31,7 @@ parser.add_argument("--duplicateKOs", help = '''how to deal with KO terms that a
                     'vote': KO term is assigned GO terms associated with at least 50% of the genes it covers,
                     'shared': KO term is assigned only the common GO terms shared with every genes it covers''', default = "all")
 
-args = parser.parse_args(["-o", "pae", "-f", os.path.join(netscratch, "MIRO02-01", "functions"), "--duplicateKOs", "low"])
+args = parser.parse_args()
 
 
 import requests
